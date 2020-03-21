@@ -16,7 +16,7 @@
         <ListView
             android:id="@+id/listView"
             android:layout_width="409dp"
-            android:layout_height="237dp"
+            android:layout_height="match_parent"
             app:layout_constraintTop_toTopOf="parent" />
     </FrameLayout>
 
