@@ -3,12 +3,13 @@ package ba.unsa.etf.rma.vj_6;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.util.Log;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -16,12 +17,12 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements IMovieListView {
     String msg = "Android log poruka : ";
-    Button button;
     EditText editText;
     ListView listView;
     //ArrayList<String> entries;
     private IMovieListPresenter presenter;
     private MovieListAdapter adapter;
+    private MovieBroadcastReceiver receiver;
 
     public IMovieListPresenter getPresenter() {
         if(presenter == null) {
@@ -29,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements IMovieListView {
         }
         return presenter;
     }
+
+    private AdapterView.OnItemClickListener listItemClickListener;
 
 
 
@@ -41,23 +44,34 @@ public class MainActivity extends AppCompatActivity implements IMovieListView {
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
         getPresenter().refreshMovies();
-        button = (Button) findViewById(R.id.button);
 
-        button.setOnClickListener(new View.OnClickListener() {
+
+        AdapterView.OnItemClickListener listItemClickListener = new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "dabadabadab");
-                sendIntent.setType("text/plain");
-                // Provjera da li postoji aplikacija koja moˇze obaviti navedenu akciju
-                if (sendIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(sendIntent);
-                }
-
-
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent movieDetailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
+                Movie movie = adapter.getMovie(position);
+                //movieDetailIntent.putExtra("title", movie.getTitle());
+                movieDetailIntent.putExtra("title", movie.getTitle());
+                MainActivity.this.startActivity(movieDetailIntent);
             }
-        });
+        };
+
+        listView.setOnItemClickListener(listItemClickListener);
+        editText = (EditText) findViewById(R.id.editText);
+
+        //napuni search bar - maznuto od mikija
+        if (getIntent().getAction().equals(Intent.ACTION_SEND)) {
+            editText.setText(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+        }
+/*
+        receiver = new MovieBroadcastReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(CONNECTIVITY_SERVICE);
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(receiver, intentFilter);*/
+
+
 
         /*button = (Button) findViewById(R.id.button);
         editText = (EditText) findViewById(R.id.editText);

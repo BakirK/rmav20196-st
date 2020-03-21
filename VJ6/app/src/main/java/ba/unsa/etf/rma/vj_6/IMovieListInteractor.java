@@ -4,4 +4,5 @@ import java.util.ArrayList;
 
 public interface IMovieListInteractor {
     ArrayList<Movie> get();
+    void addMovie(Movie m);
 }

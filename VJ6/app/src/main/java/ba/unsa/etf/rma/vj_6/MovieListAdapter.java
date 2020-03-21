@@ -64,10 +64,10 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
             Class res = R.drawable.class;
             Field field = res.getField(genreMatch);
             int drawableId = field.getInt(null);
-            s = Integer.toString(field.getInt(null));
+            /*s = Integer.toString(field.getInt(null));
             Log.d(s, " za null\n");
             s = Integer.toString(field.getInt(field));
-            Log.d(s, " za field\n");
+            Log.d(s, " za field\n");*/
             imageView.setImageResource(drawableId);
         }
         catch (Exception e) {
@@ -79,5 +79,9 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
 
     public void setMovies(ArrayList<Movie> movies) {
         this.addAll(movies);
+    }
+
+    public Movie getMovie(int position) {
+        return super.getItem(position);
     }
 }

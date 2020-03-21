@@ -8,4 +8,9 @@ public class MovieListInteractor implements IMovieListInteractor {
     public ArrayList<Movie> get() {
         return MoviesModel.movies;
     }
+
+    @Override
+    public void addMovie(Movie m) {
+        MoviesModel.movies.add(m);
+    }
 }
