@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bosanski Netflix</string>
+    <string name="btn_name">Pretraži</string>
+    <string name="hint_name">Ime filma</string>
+    <string name="share">Podijeli</string>
+    <string name="similarMovies">Slični filmovi</string>
+    <string name="cast">Glumci</string>
+</resources>

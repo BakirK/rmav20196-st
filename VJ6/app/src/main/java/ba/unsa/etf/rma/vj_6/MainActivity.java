@@ -1,6 +1,8 @@
 package ba.unsa.etf.rma.vj_6;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -11,25 +13,24 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements IMovieListView {
+public class MainActivity extends AppCompatActivity implements MovieListFragment.OnItemClick {
     String msg = "Android log poruka : ";
-    EditText editText;
-    ListView listView;
+
     //ArrayList<String> entries;
-    private IMovieListPresenter presenter;
     private MovieListAdapter adapter;
     private MovieBroadcastReceiver receiver;
+    // twoPaneMode je privatni atribut klase Pocetni koji je tipa boolean
+    // ovu variablu ´cemo koristiti da znamo o kojem layoutu se radi
+    // ako je twoPaneMode true tada se radi o ˇsirem layoutu (dva fragmenta)
+    // ako je twoPaneMode false tada se radi o poˇcetnom layoutu (jedan fragment)
+    private boolean twoPaneMode;
 
-    public IMovieListPresenter getPresenter() {
-        if(presenter == null) {
-            presenter = new MovieListPresenter(this, this);
-        }
-        return presenter;
-    }
+
 
     private AdapterView.OnItemClickListener listItemClickListener;
 
@@ -39,30 +40,41 @@ public class MainActivity extends AppCompatActivity implements IMovieListView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(msg, "onCreate() metoda");
-        adapter = new MovieListAdapter(getApplicationContext(), R.layout.list_element, new ArrayList<Movie>());
-        listView = (ListView) findViewById(R.id.listView);
-        listView.setAdapter(adapter);
-        getPresenter().refreshMovies();
-
-
-        AdapterView.OnItemClickListener listItemClickListener = new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent movieDetailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
-                Movie movie = adapter.getMovie(position);
-                //movieDetailIntent.putExtra("title", movie.getTitle());
-                movieDetailIntent.putExtra("title", movie.getTitle());
-                MainActivity.this.startActivity(movieDetailIntent);
+        //dohvatanje FragmentManager-a
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FrameLayout details = findViewById(R.id.movie_detail);
+        //slucaj layouta za ˇsiroke ekrane
+        if (details != null) {
+            twoPaneMode = true;
+            MovieDetailFragment detailFragment = (MovieDetailFragment)
+                    fragmentManager.findFragmentById(R.id.movie_detail);
+        //provjerimo da li je fragment detalji ve´c kreiran
+            if (detailFragment==null) {
+        //kreiramo novi fragment FragmentDetalji ukoliko ve´c nije kreiran
+                detailFragment = new MovieDetailFragment();
+                fragmentManager.beginTransaction().replace(R.id.movie_detail, detailFragment).commit();
             }
-        };
-
-        listView.setOnItemClickListener(listItemClickListener);
-        editText = (EditText) findViewById(R.id.editText);
-
-        //napuni search bar - maznuto od mikija
-        if (getIntent().getAction().equals(Intent.ACTION_SEND)) {
-            editText.setText(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+        } else {
+            twoPaneMode = false;
+        }
+        //Dodjeljivanje fragmenta MovieListFragment
+        Fragment listFragment =
+                fragmentManager.findFragmentByTag("list");
+        //provjerimo da li je vec kreiran navedeni fragment
+        if (listFragment==null){
+        //ukoliko nije, kreiramo
+            listFragment = new MovieListFragment();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.movies_list,listFragment,"list")
+                    .commit();
+        } else {
+        //slucaj kada mijenjamo orijentaciju uredaja
+        //iz portrait (uspravna) u landscape (vodoravna)
+        //a u aktivnosti je bio otvoren fragment MovieDetailFragment
+        //tada je potrebno skinuti MovieDetailFragment sa steka
+        //kako ne bi bio dodan na mjesto fragmenta MovieListFragment
+            fragmentManager.popBackStack(null,
+                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
 /*
         receiver = new MovieBroadcastReceiver();
@@ -120,12 +132,20 @@ public class MainActivity extends AppCompatActivity implements IMovieListView {
     }
 
     @Override
-    public void setMovies(ArrayList<Movie> movies) {
-        adapter.setMovies(movies);
-    }
-
-    @Override
-    public void notifyMovieListDataSetChanged() {
-        adapter.notifyDataSetChanged();
+    public void onItemClicked(Movie movie) {
+        //Priprema novog fragmenta FragmentDetalji
+        Bundle arguments = new Bundle();
+        arguments.putParcelable("movie", movie);
+        MovieDetailFragment detailFragment = new MovieDetailFragment();
+        detailFragment.setArguments(arguments);
+        if (twoPaneMode){
+            //Slucaj za ekrane sa sirom dijagonalom
+            getSupportFragmentManager().beginTransaction().replace(R.id.movie_detail, detailFragment).commit();
+        }
+        else {
+            //Slucaj za ekrane sa pocetno zadanom sirinom
+            getSupportFragmentManager().beginTransaction().replace(R.id.movies_list,detailFragment).addToBackStack(null).commit();
+//Primijetite liniju .addToBackStack(null)
+        }
     }
 }

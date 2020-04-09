@@ -1,6 +1,7 @@
 package ba.unsa.etf.rma.vj_6;
 
 import android.content.Context;
+import android.os.Parcelable;
 
 import java.util.ArrayList;
 
@@ -37,5 +38,9 @@ public class MovieDetailPresenter implements IMovieDetailPresenter {
     @Override
     public Movie getMovie() {
         return movie;
+    }
+    @Override
+    public void setMovie(Parcelable movie) {
+        this.movie = (Movie)movie;
     }
 }

@@ -64,14 +64,10 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
             Class res = R.drawable.class;
             Field field = res.getField(genreMatch);
             int drawableId = field.getInt(null);
-            /*s = Integer.toString(field.getInt(null));
-            Log.d(s, " za null\n");
-            s = Integer.toString(field.getInt(field));
-            Log.d(s, " za field\n");*/
             imageView.setImageResource(drawableId);
         }
         catch (Exception e) {
-            imageView.setImageResource(R.drawable.picture1);
+            imageView.setImageResource(R.drawable.cam);
         }
         return newView;
 
