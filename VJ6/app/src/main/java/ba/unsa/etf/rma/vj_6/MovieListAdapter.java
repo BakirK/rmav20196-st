@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.bumptech.glide.Glide;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +24,7 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
     public TextView titleView;
     public TextView genreView;
     public ImageView imageView;
-    private String s = "";
-
+    private String posterPath="https://image.tmdb.org/t/p/w342";
     public MovieListAdapter(@NonNull Context context, int resource, @NonNull List<Movie> items) {
         super(context, resource, items);
         this.resource = resource;
@@ -59,7 +60,7 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
 
 
         imageView = newView.findViewById(R.id.icon);
-        String genreMatch = movie.getGenre();
+        /*String genreMatch = movie.getGenre();
         try {
             Class res = R.drawable.class;
             Field field = res.getField(genreMatch);
@@ -68,7 +69,15 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
         }
         catch (Exception e) {
             imageView.setImageResource(R.drawable.cam);
-        }
+        }*/
+        Glide.with(getContext())
+                .load(posterPath+movie.getPosterPath())
+                .centerCrop()
+                .placeholder(R.drawable.cam)
+                .error(R.drawable.cam)
+                .fallback(R.drawable.cam)
+                .into(imageView);
+
         return newView;
 
     }
@@ -78,6 +87,6 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
     }
 
     public Movie getMovie(int position) {
-        return super.getItem(position);
+            return super.getItem(position);
     }
 }

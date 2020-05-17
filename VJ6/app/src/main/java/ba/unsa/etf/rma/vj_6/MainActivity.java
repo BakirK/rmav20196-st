@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
     public void onItemClicked(Movie movie) {
         //Priprema novog fragmenta FragmentDetalji
         Bundle arguments = new Bundle();
-        arguments.putParcelable("movie", movie);
+        arguments.putInt("id", movie.getId());
         MovieDetailFragment detailFragment = new MovieDetailFragment();
         detailFragment.setArguments(arguments);
         if (twoPaneMode){

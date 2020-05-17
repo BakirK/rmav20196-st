@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.lang.reflect.Field;
 
-public class MovieDetailActivity extends AppCompatActivity implements IMovieDetailView {
+public class MovieDetailActivity extends AppCompatActivity {
 
 
 

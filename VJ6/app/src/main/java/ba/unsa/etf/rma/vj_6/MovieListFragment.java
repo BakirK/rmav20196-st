@@ -2,10 +2,12 @@ package ba.unsa.etf.rma.vj_6;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -19,7 +21,7 @@ public class MovieListFragment extends Fragment implements IMovieListView {
     private EditText editText;
     private MovieListAdapter movieListAdapter;
     private IMovieListPresenter movieListPresenter;
-
+    private Button button;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,8 +29,8 @@ public class MovieListFragment extends Fragment implements IMovieListView {
         movieListAdapter = new MovieListAdapter(getActivity(), R.layout.list_element, new ArrayList<Movie>());
         listView = (ListView) fragmentView.findViewById(R.id.listView);
         listView.setAdapter(movieListAdapter);
-        getPresenter().refreshMovies();
-        listView.setOnItemClickListener(listItemClickListener);
+        //getPresenter().refreshMovies();
+        //listView.setOnItemClickListener(listItemClickListener);
         editText = (EditText) fragmentView.findViewById(R.id.editText);
 
         //napuni search bar - maznuto od mikija
@@ -45,9 +47,17 @@ public class MovieListFragment extends Fragment implements IMovieListView {
             //baca se izuzetak
             throw new ClassCastException(getActivity().toString() + "Treba implementirati OnItemClick");
         }
-            //ukoliko je aktivnost uspjesno cast-ana u interfejs
-            //tada njoj prosljedujemo event
-            listView.setOnItemClickListener(listItemClickListener);
+        //ukoliko je aktivnost uspjesno cast-ana u interfejs
+        //tada njoj prosljedujemo event
+        listView.setOnItemClickListener(listItemClickListener);
+        button = fragmentView.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+                                      @Override
+                                      public void onClick(View v) {
+                                          getPresenter().searchMovies(editText.getText().toString());
+                                      }
+                                    }
+        );
             return fragmentView;
             //return inflater.inflate(R.layout.fragment_list, container, false);
 
