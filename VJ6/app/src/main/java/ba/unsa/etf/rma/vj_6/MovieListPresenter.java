@@ -39,8 +39,8 @@ public class MovieListPresenter implements IMovieListPresenter, MovieListResultR
     }
 
     @Override
-    public void getMovies() {
-        view.setMovies(movieListInteractor.getMovies(context.getApplicationContext()));
+    public void getMoviesCursor() {
+        view.setCursor(movieListInteractor.getMovieCursor(context.getApplicationContext()));
     }
 
     @Override

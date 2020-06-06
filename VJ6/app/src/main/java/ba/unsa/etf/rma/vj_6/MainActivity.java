@@ -132,14 +132,13 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
     }
 
     @Override
-    public void onItemClicked(Movie movie) {
+    public void onItemClicked(Boolean inDatabase, int id) {
         //Priprema novog fragmenta FragmentDetalji
         Bundle arguments = new Bundle();
-        if(movie.getActors().isEmpty()) {
-            arguments.putInt("id", movie.getId());
-        } else {
-            arguments.putParcelable("movie", movie);
-        }
+        if (!inDatabase)
+            arguments.putInt("id", id);
+        else
+            arguments.putInt("internal_id",id);
         MovieDetailFragment detailFragment = new MovieDetailFragment();
         detailFragment.setArguments(arguments);
         if (twoPaneMode){
@@ -149,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
         else {
             //Slucaj za ekrane sa pocetno zadanom sirinom
             getSupportFragmentManager().beginTransaction().replace(R.id.movies_list,detailFragment).addToBackStack(null).commit();
-//Primijetite liniju .addToBackStack(null)
         }
     }
 }

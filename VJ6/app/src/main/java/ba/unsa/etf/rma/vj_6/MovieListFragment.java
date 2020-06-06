@@ -1,6 +1,7 @@
 package ba.unsa.etf.rma.vj_6;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ public class MovieListFragment extends Fragment implements IMovieListView {
     private ListView listView;
     private EditText editText;
     private MovieListAdapter movieListAdapter;
+    private MovieListCursorAdapter movieListCursorAdapter;
     private IMovieListPresenter movieListPresenter;
     private Button button;
 
@@ -28,12 +30,13 @@ public class MovieListFragment extends Fragment implements IMovieListView {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_list, container, false);
         movieListAdapter=new MovieListAdapter(getActivity(), R.layout.list_element, new ArrayList<Movie>());
+        movieListCursorAdapter= new MovieListCursorAdapter(getActivity(), R.layout.list_element,null,false);
         listView= fragmentView.findViewById(R.id.listView);
-        listView.setAdapter(movieListAdapter);
-        listView.setOnItemClickListener(listItemClickListener);
+        listView.setAdapter(movieListCursorAdapter);
+        listView.setOnItemClickListener(listCursorItemClickListener);
         editText = fragmentView.findViewById(R.id.editText);
         onItemClick= (OnItemClick) getActivity();
-        getPresenter().getMovies();
+        getPresenter().getMoviesCursor();
         Intent intent = getActivity().getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -59,6 +62,8 @@ public class MovieListFragment extends Fragment implements IMovieListView {
 
     @Override
     public void setMovies(ArrayList<Movie> movies) {
+        listView.setAdapter(movieListAdapter);
+        listView.setOnItemClickListener(listItemClickListener);
         movieListAdapter.setMovies(movies);
     }
 
@@ -73,21 +78,38 @@ public class MovieListFragment extends Fragment implements IMovieListView {
     }
 
     public interface OnItemClick {
-        void onItemClicked(Movie movie);
+        void onItemClicked(Boolean inDatabase, int id);
     }
     private AdapterView.OnItemClickListener listItemClickListener =
             new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Movie movie = movieListAdapter.getMovie(position);
-                    onItemClick.onItemClicked(movie);
+                    onItemClick.onItemClicked(false,movie.getId());
                 }
             };
+
+    private AdapterView.OnItemClickListener listCursorItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+            if(cursor != null) {
+                onItemClick.onItemClicked(true, cursor.getInt(cursor.getColumnIndex(MovieDBOpenHelper.MOVIE_INTERNAL_ID)));
+            }
+        }
+    };
 
     public IMovieListPresenter getPresenter() {
         if (movieListPresenter == null) {
             movieListPresenter = new MovieListPresenter(this, getActivity());
         }
         return movieListPresenter;
+    }
+
+    @Override
+    public void setCursor(Cursor cursor) {
+        listView.setAdapter(movieListCursorAdapter);
+        listView.setOnItemClickListener(listCursorItemClickListener);
+        movieListCursorAdapter.changeCursor(cursor);
     }
 }

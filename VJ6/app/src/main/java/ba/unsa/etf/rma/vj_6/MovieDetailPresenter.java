@@ -2,6 +2,7 @@ package ba.unsa.etf.rma.vj_6;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -15,6 +16,11 @@ public class MovieDetailPresenter implements IMovieDetailPresenter, MovieDetailR
 
     public MovieDetailPresenter(IMovieDetailView view, Context context) {
         this.view       = view;
+        this.context    = context;
+        this.movieDetailInteractor = new MovieDetailInteractor();
+    }
+
+    public MovieDetailPresenter(Context context) {
         this.context    = context;
         this.movieDetailInteractor = new MovieDetailInteractor();
     }
@@ -37,6 +43,21 @@ public class MovieDetailPresenter implements IMovieDetailPresenter, MovieDetailR
         movieDetailResultReceiver.setReceiver(MovieDetailPresenter.this);
         intent.putExtra("receiver", movieDetailResultReceiver);
         context.getApplicationContext().startService(intent);
+    }
+
+    @Override
+    public void getDatabaseMovie(int id) {
+        movie = movieDetailInteractor.getMovie(context, id);
+    }
+
+    @Override
+    public Cursor getCastCursor(int id) {
+        return movieDetailInteractor.getCastCursor(context, id);
+    }
+
+    @Override
+    public Cursor getSimilarCursor(int id) {
+        return movieDetailInteractor.getSimilarCursor(context, id);
     }
 
 

@@ -37,6 +37,18 @@
         </receiver>
         <service android:enabled="true" android:name="MovieListInteractor"/>
         <service android:enabled="true" android:name="MovieDetailInteractor"/>
+        <provider
+            android:authorities="rma.provider.movies"
+            android:name=".MovieContentProvider">
+        </provider>
+        <provider
+            android:authorities="rma.provider.similar"
+            android:name=".SimilarContentProvider">
+        </provider>
+        <provider
+            android:authorities="rma.provider.cast"
+            android:name=".CastContentProvider">
+        </provider>
     </application>
 
 </manifest>

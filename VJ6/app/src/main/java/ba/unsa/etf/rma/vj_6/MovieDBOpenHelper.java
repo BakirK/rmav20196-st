@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class MovieDBOpenHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "RMADataBase.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
 
     public MovieDBOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
@@ -20,7 +20,7 @@ public class MovieDBOpenHelper extends SQLiteOpenHelper {
 
     public static final String MOVIE_TABLE = "movies";
     public static final String MOVIE_ID = "id";
-    public static final String MOVIE_INTERNAL_ID = "internalId";
+    public static final String MOVIE_INTERNAL_ID = "_id";
     public static final String MOVIE_TITLE = "title";
     public static final String MOVIE_GENRE = "genre";
     public static final String MOVIE_HOMEPAGE = "homepage";
@@ -42,7 +42,7 @@ public class MovieDBOpenHelper extends SQLiteOpenHelper {
 
 
     public static final String CAST_TABLE = "actors";
-    public static final String CAST_ID = "id";
+    public static final String CAST_ID = "_id";
     public static final String CAST_NAME = "name";
     public static final String CAST_MOVIE_ID = "movie_id";
 
@@ -58,7 +58,7 @@ public class MovieDBOpenHelper extends SQLiteOpenHelper {
 
 
     public static final String SIMILIAR_MOVIES = "similar";
-    public static final String SMOVIES_ID = "id";
+    public static final String SMOVIES_ID = "_id";
     public static final String SMOVIE_TITLE = "title";
     public static final String SMOVIES_MOVIE_ID = "movie_id";
 

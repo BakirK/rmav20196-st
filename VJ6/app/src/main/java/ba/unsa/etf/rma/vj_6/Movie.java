@@ -13,6 +13,17 @@ public class Movie implements Parcelable {
     private String overview;
     private String posterPath;
     private Integer id;
+    private Integer internalId;
+
+
+    public Integer getInternalId() {
+        return internalId;
+    }
+
+    public void setInternalId(Integer internalId) {
+        this.internalId = internalId;
+    }
+
 
     public Movie(Integer id, String title, String overview, String releaseDate, String posterPath) {
         this.id = id;
@@ -40,6 +51,19 @@ public class Movie implements Parcelable {
         this.homepage = homepage;
         this.genre = genre;
         this.actors = actors;
+    }
+
+    public Movie(String title, String overview, String releaseDate, String homepage, String posterPath, Integer id, String genre, Integer internalId) {
+        this.title = title;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+        this.homepage = homepage;
+        this.posterPath = posterPath;
+        this.id = id;
+        this.genre = genre;
+        this.internalId = internalId;
+        this.actors = new ArrayList<>();
+        this.similarMovies = new ArrayList<>();
     }
 
     public ArrayList<String> getActors() {
