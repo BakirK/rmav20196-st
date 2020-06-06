@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -26,41 +27,34 @@ public class MovieListFragment extends Fragment implements IMovieListView {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_list, container, false);
-        movieListAdapter = new MovieListAdapter(getActivity(), R.layout.list_element, new ArrayList<Movie>());
-        listView = (ListView) fragmentView.findViewById(R.id.listView);
+        movieListAdapter=new MovieListAdapter(getActivity(), R.layout.list_element, new ArrayList<Movie>());
+        listView= fragmentView.findViewById(R.id.listView);
         listView.setAdapter(movieListAdapter);
-        //getPresenter().refreshMovies();
-        //listView.setOnItemClickListener(listItemClickListener);
-        editText = (EditText) fragmentView.findViewById(R.id.editText);
-
-        //napuni search bar - maznuto od mikija
-        if (getActivity().getIntent().getAction().equals(Intent.ACTION_SEND)) {
-            editText.setText(getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT));
-        }
-            try {
-            //u sljede´coj liniji dohvatamo referencu na roditeljsku aktivnost
-            //kako ona implementira interfejs OnItemClick
-            //moguce ju je castati u taj interfejs
-            onItemClick = (OnItemClick)getActivity();
-        } catch (ClassCastException e) {
-            //u slucaju da se u roditeljskoj aktivnosti nije implementirao interfejs
-            //baca se izuzetak
-            throw new ClassCastException(getActivity().toString() + "Treba implementirati OnItemClick");
-        }
-        //ukoliko je aktivnost uspjesno cast-ana u interfejs
-        //tada njoj prosljedujemo event
         listView.setOnItemClickListener(listItemClickListener);
+        editText = fragmentView.findViewById(R.id.editText);
+        onItemClick= (OnItemClick) getActivity();
+        getPresenter().getMovies();
+        Intent intent = getActivity().getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if (sharedText != null) {
+                    editText.setText(sharedText);
+                }
+            }
+        }
         button = fragmentView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
                                       @Override
                                       public void onClick(View v) {
                                           getPresenter().searchMovies(editText.getText().toString());
                                       }
-                                    }
+                                  }
         );
-            return fragmentView;
-            //return inflater.inflate(R.layout.fragment_list, container, false);
-
+        return fragmentView;
+        //return inflater.inflate(R.layout.fragment_list, container, false);
     }
 
     @Override
@@ -73,6 +67,11 @@ public class MovieListFragment extends Fragment implements IMovieListView {
         movieListAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void showToast(String text) {
+        Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
+    }
+
     public interface OnItemClick {
         void onItemClicked(Movie movie);
     }
@@ -80,13 +79,6 @@ public class MovieListFragment extends Fragment implements IMovieListView {
             new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    /* old listener
-                    Intent movieDetailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
-                    Movie movie = adapter.getMovie(position);
-                    //movieDetailIntent.putExtra("title", movie.getTitle());
-                    movieDetailIntent.putExtra("title", movie.getTitle());
-                    MainActivity.this.startActivity(movieDetailIntent);
-                    */
                     Movie movie = movieListAdapter.getMovie(position);
                     onItemClick.onItemClicked(movie);
                 }

@@ -6,4 +6,7 @@
     <string name="share">Podijeli</string>
     <string name="similarMovies">Slični filmovi</string>
     <string name="cast">Glumci</string>
+    <string name="success">Uspjesno</string>
+    <string name="searching">Pretraga...</string>
+    <string name="error">Belaj</string>
 </resources>

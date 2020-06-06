@@ -1,7 +1,14 @@
 package ba.unsa.etf.rma.vj_6;
 
-import android.os.AsyncTask;
-import android.util.Log;
+import android.app.IntentService;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.os.ResultReceiver;
+
+import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,13 +26,20 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-public class MovieDetailInteractor extends AsyncTask<String, Integer, Void> implements IMovieListInteractor {
+public class MovieDetailInteractor extends IntentService implements IMovieDetailInteractor {
+    final public static int STATUS_RUNNING=0;
+    final public static int STATUS_FINISHED=1;
+    final public static int STATUS_ERROR=2;
+    private MovieDBOpenHelper movieDBOpenHelper;
+    SQLiteDatabase database;
     private String tmdb_api_key="764b519aaf6c76992c258c5441a3de09";
     Movie movie;
-    private OnMovieSearchDone caller;
 
-    public MovieDetailInteractor(OnMovieSearchDone p) {
-        caller = p;
+    public MovieDetailInteractor() {
+        super(null);
+    };
+    public MovieDetailInteractor(String name) {
+        super(name);
     };
 
     public String convertStreamToString(InputStream is) {
@@ -47,45 +61,6 @@ public class MovieDetailInteractor extends AsyncTask<String, Integer, Void> impl
         return sb.toString();
     }
 
-    @Override
-    protected Void doInBackground(String... strings) {
-        Log.d("lalala", "lalala");
-        String query = null;
-        try {
-            query = URLEncoder.encode(strings[0], "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        String url1 = "https://api.themoviedb.org/3/movie/"+query+"?api_key="+tmdb_api_key;
-        try {
-            URL url = new URL(url1);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            String result = convertStreamToString(in);
-            JSONObject jsonObject = new JSONObject(result);
-            String title = jsonObject.getString("title");
-            Integer id = jsonObject.getInt("id");
-            String posterPath = jsonObject.getString("poster_path");
-            String overview = jsonObject.getString("overview");
-            String releaseDate = jsonObject.getString("release_date");
-            String homepage = jsonObject.getString("homepage");
-            String genre = jsonObject.getJSONArray("genres").getJSONObject(0).getString("name");
-            movie = new Movie(title,overview,releaseDate,homepage,posterPath,id,genre);
-            Log.d("movieObjekat", jsonObject.toString());
-            AddCast(query);
-            AddSimilarMovies(query);
-        } catch (MalformedURLException e) {
-            Log.d("ovdje1", "doInBackground");
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.d("ovdje2", "doInBackground");
-            e.printStackTrace();
-        } catch (JSONException e) {
-            Log.d("ovdje3", "doInBackground");
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     protected Void AddCast(String... params)
     {
@@ -158,12 +133,84 @@ public class MovieDetailInteractor extends AsyncTask<String, Integer, Void> impl
     }
 
     @Override
-    protected void onPostExecute(Void aVoid){
-        super.onPostExecute(aVoid);
-        caller.onDone(movie);
+    protected void onHandleIntent(@Nullable Intent intent) {
+        final ResultReceiver receiver = intent.getParcelableExtra("receiver");
+        Bundle bundle = new Bundle();
+        receiver.send(STATUS_RUNNING, Bundle.EMPTY);
+        String params = intent.getStringExtra("query");
+        String query = null;
+        try {
+            query = URLEncoder.encode(params, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String url1 = "https://api.themoviedb.org/3/movie/"+query+"?api_key="+tmdb_api_key;
+        try {
+            URL url = new URL(url1);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            String result = convertStreamToString(in);
+            JSONObject jsonObject = new JSONObject(result);
+            String title = jsonObject.getString("title");
+            Integer id = jsonObject.getInt("id");
+            String posterPath = jsonObject.getString("poster_path");
+            String overview = jsonObject.getString("overview");
+            String releaseDate = jsonObject.getString("release_date");
+            String homepage = jsonObject.getString("homepage");
+            String genre = jsonObject.getJSONArray("genres").getJSONObject(0).getString("name");
+            movie = new Movie(title,overview,releaseDate,homepage,posterPath,id,genre);
+            AddCast(query);
+            AddSimilarMovies(query);
+        } catch (ClassCastException e) {
+            bundle.putString(Intent.EXTRA_TEXT, e.toString());
+            receiver.send(STATUS_ERROR, bundle);
+            return;
+        } catch (MalformedURLException e) {
+            bundle.putString(Intent.EXTRA_TEXT, e.toString());
+            receiver.send(STATUS_ERROR, bundle);
+            return;
+        } catch (IOException e) {
+            bundle.putString(Intent.EXTRA_TEXT, e.toString());
+            receiver.send(STATUS_ERROR, bundle);
+            return;
+        } catch (JSONException e) {
+            bundle.putString(Intent.EXTRA_TEXT, e.toString());
+            receiver.send(STATUS_ERROR, bundle);
+            return;
+        }
+        bundle.putParcelable("result", movie);
+        receiver.send(STATUS_FINISHED, bundle);
     }
 
-    public interface OnMovieSearchDone{
-        void onDone(Movie result);
+    @Override
+    public void save(Movie movie, Context context) {
+        movieDBOpenHelper = new MovieDBOpenHelper(context);
+        database = movieDBOpenHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(MovieDBOpenHelper.MOVIE_ID, movie.getId());
+        values.put(MovieDBOpenHelper.MOVIE_TITLE, movie.getTitle());
+        values.put(MovieDBOpenHelper.MOVIE_GENRE, movie.getGenre());
+        values.put(MovieDBOpenHelper.MOVIE_HOMEPAGE, movie.getHomepage());
+        values.put(MovieDBOpenHelper.MOVIE_OVERVIEW, movie.getOverview());
+        values.put(MovieDBOpenHelper.MOVIE_POSTERPATH, movie.getPosterPath());
+        values.put(MovieDBOpenHelper.MOVIE_RELEASEDATE, movie.getReleaseDate());
+        database.insert(MovieDBOpenHelper.MOVIE_TABLE, null, values);
+
+        for (int i = 0; i < movie.getActors().size(); i++){
+            String name = movie.getActors().get(i);
+            ContentValues cast = new ContentValues();
+            cast.put(MovieDBOpenHelper.CAST_NAME,name);
+            cast.put(MovieDBOpenHelper.CAST_MOVIE_ID, movie.getId());
+            database.insert(MovieDBOpenHelper.CAST_TABLE, null, cast);
+        }
+
+        for (int i = 0; i < movie.getSimilarMovies().size(); i++){
+            String title = movie.getSimilarMovies().get(i);
+            ContentValues similar = new ContentValues();
+            similar.put(MovieDBOpenHelper.SMOVIE_TITLE,title);
+            similar.put(MovieDBOpenHelper.SMOVIES_MOVIE_ID, movie.getId());
+            database.insert(MovieDBOpenHelper.SIMILIAR_MOVIES, null, similar);
+        }
+        database.close();
     }
 }

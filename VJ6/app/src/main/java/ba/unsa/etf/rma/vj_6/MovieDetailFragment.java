@@ -7,19 +7,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
-
 import androidx.fragment.app.Fragment;
-
 import com.bumptech.glide.Glide;
-
-import java.lang.reflect.Field;
 
 public class MovieDetailFragment extends Fragment implements IMovieDetailView {
 
@@ -105,21 +101,26 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailView {
             Bundle savedInstanceState) {
         Log.d("onCreateView", "onCreateView");
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
+        title = view.findViewById(R.id.title);
+        genre = view.findViewById(R.id.genre);
+        overview = view.findViewById(R.id.overview);
+        releaseDate = view.findViewById(R.id.releaseDate);
+        homepage = view.findViewById(R.id.homepage);
+        share = view.findViewById(R.id.share);
+        toggleButton = view.findViewById(R.id.toggle_button);
+        imageView = view.findViewById(R.id.icon);
+        homepage.setOnClickListener(homepageOnClickListener);
+        title.setOnClickListener(titleOnClickListener);
+        share.setOnClickListener(shareOnClickListener);
+        toggleButton.setOnCheckedChangeListener(toggleOnCheckedChangeListener);
         if (getArguments() != null && getArguments().containsKey("id")) {
             int id = getArguments().getInt("id");
             getPresenter().searchMovie(String.valueOf(id));
-            title = view.findViewById(R.id.title);
-            genre = view.findViewById(R.id.genre);
-            overview = view.findViewById(R.id.overview);
-            releaseDate = view.findViewById(R.id.releaseDate);
-            homepage = view.findViewById(R.id.homepage);
-            share = view.findViewById(R.id.share);
-            toggleButton = view.findViewById(R.id.toggle_button);
-            imageView = view.findViewById(R.id.icon);
-            homepage.setOnClickListener(homepageOnClickListener);
-            title.setOnClickListener(titleOnClickListener);
-            share.setOnClickListener(shareOnClickListener);
-            toggleButton.setOnCheckedChangeListener(toggleOnCheckedChangeListener);
+        }
+        if (getArguments() != null && getArguments().containsKey("movie")) {
+            Movie movie = getArguments().getParcelable("movie");
+            getPresenter().setMovie(movie);
+            refreshView();
         }
         return  view;
     }
@@ -148,6 +149,11 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailView {
                 .add(R.id.frame, castFragment)
                 .commit();
 
+    }
+
+    @Override
+    public void showToast(String text) {
+        Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
     }
 
 }

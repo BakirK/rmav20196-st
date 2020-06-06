@@ -35,6 +35,8 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
+        <service android:enabled="true" android:name="MovieListInteractor"/>
+        <service android:enabled="true" android:name="MovieDetailInteractor"/>
     </application>
 
 </manifest>

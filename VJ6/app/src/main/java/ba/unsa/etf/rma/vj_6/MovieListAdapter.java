@@ -83,7 +83,7 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
     }
 
     public void setMovies(ArrayList<Movie> movies) {
-        this.addAll(movies);
+        super.addAll(movies);
     }
 
     public Movie getMovie(int position) {

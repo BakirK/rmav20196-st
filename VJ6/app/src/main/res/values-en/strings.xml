@@ -6,4 +6,7 @@
     <string name="share">Share</string>
     <string name="similarMovies">Similar movies</string>
     <string name="cast">Cast</string>
+    <string name="success">Success</string>
+    <string name="searching">Searching</string>
+    <string name="error">Error</string>
 </resources>

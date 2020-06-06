@@ -50,7 +50,7 @@ public class Movie implements Parcelable {
         this.actors = actors;
     }
 
-    private ArrayList<String> actors;
+    private ArrayList<String> actors = new ArrayList<>();
 
     public ArrayList<String> getSimilarMovies() {
         return similarMovies;

@@ -1,6 +1,6 @@
 package ba.unsa.etf.rma.vj_6;
 
 public interface IMovieListPresenter {
-    //void refreshMovies();
-    public void searchMovies(String query);
+    void searchMovies(String query);
+    void getMovies();
 }

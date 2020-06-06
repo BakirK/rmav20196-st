@@ -1,39 +1,23 @@
 package ba.unsa.etf.rma.vj_6;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
-import android.util.Log;
 
-import java.util.ArrayList;
-
-public class MovieDetailPresenter implements IMovieDetailPresenter, MovieDetailInteractor.OnMovieSearchDone {
-    //private IMovieListInteractor interactor;
+public class MovieDetailPresenter implements IMovieDetailPresenter, MovieDetailResultReceiver.Receiver {
+    private IMovieDetailInteractor movieDetailInteractor;
+    private MovieDetailResultReceiver movieDetailResultReceiver;
     private Context context;
     private IMovieDetailView view;
     private Movie movie;
 
-
-    /*public MovieDetailPresenter(String title, Context context) {
-        this.interactor = new MovieListInteractor();
-        this.context = context;
-        this.movie = getMovieByTitle(title);
-    }*/
-
     public MovieDetailPresenter(IMovieDetailView view, Context context) {
         this.view       = view;
         this.context    = context;
+        this.movieDetailInteractor = new MovieDetailInteractor();
     }
-
-    /*@Override
-    public Movie getMovieByTitle(String title) {
-        ArrayList<Movie> movies = interactor.get();
-        for (Movie m : movies) {
-            if (m.getTitle().equals(title)) {
-                return m;
-            }
-        }
-        return null;
-    }*/
 
     @Override
     public Movie getMovie() {
@@ -46,18 +30,32 @@ public class MovieDetailPresenter implements IMovieDetailPresenter, MovieDetailI
 
     @Override
     public void searchMovie(String query) {
-        new MovieDetailInteractor((MovieDetailInteractor.OnMovieSearchDone) this).execute(query);
+        //new MovieDetailInteractor((MovieDetailInteractor.OnMovieSearchDone) this).execute(query);
+        Intent intent = new Intent(Intent.ACTION_SYNC, null, context, MovieDetailInteractor.class);
+        intent.putExtra("query", query);
+        movieDetailResultReceiver = new MovieDetailResultReceiver(new Handler());
+        movieDetailResultReceiver.setReceiver(MovieDetailPresenter.this);
+        intent.putExtra("receiver", movieDetailResultReceiver);
+        context.getApplicationContext().startService(intent);
     }
 
-    @Override
-    public void create(String title, String overview, String releaseDate, String genre, String homepage, ArrayList<String> actors) {
-        this.movie = new Movie(title,overview,releaseDate,homepage,genre,actors);
-    }
 
     @Override
-    public void onDone(Movie result) {
-        movie = result;
-        Log.d("res", result.toString());
-        view.refreshView();
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        switch (resultCode) {
+            case MovieListInteractor.STATUS_RUNNING:
+                view.showToast(context.getResources().getString(R.string.searching));
+                break;
+            case MovieListInteractor.STATUS_FINISHED:
+                Movie result = resultData.getParcelable("result");
+                view.showToast(context.getResources().getString(R.string.success));
+                movie = result;
+                movieDetailInteractor.save(result,context.getApplicationContext());
+                view.refreshView();
+                break;
+            case MovieListInteractor.STATUS_ERROR:
+                view.showToast(context.getResources().getString(R.string.error));
+                break;
+        }
     }
 }

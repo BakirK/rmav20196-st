@@ -5,4 +5,5 @@ import java.util.ArrayList;
 interface IMovieListView {
     void setMovies(ArrayList<Movie> movies);
     void notifyMovieListDataSetChanged();
+    void showToast(String text);
 }
