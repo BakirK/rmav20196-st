@@ -4,19 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.util.Log;
-
 import android.os.Bundle;
-import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ListView;
 
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MovieListFragment.OnItemClick {
     String msg = "Android log poruka : ";
@@ -35,11 +27,11 @@ public class MainActivity extends AppCompatActivity implements MovieListFragment
     private AdapterView.OnItemClickListener listItemClickListener;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         //dohvatanje FragmentManager-a
         FragmentManager fragmentManager = getSupportFragmentManager();
         FrameLayout details = findViewById(R.id.movie_detail);
